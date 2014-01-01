@@ -1,13 +1,14 @@
 package synapticloop.hedera.server.servant;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import synapticloop.nanohttpd.router.RestRoutable;
 import synapticloop.nanohttpd.utils.HttpUtils;
@@ -20,33 +21,25 @@ public class HederaRestServant extends RestRoutable {
 		super(routeContext, params);
 	}
 
-	private String getRestParams(HashMap<String, String> restParams) {
-		StringBuilder stringBuilder = new StringBuilder();
-		for (Iterator<String> iterator = restParams.keySet().iterator(); iterator.hasNext();) {
-			String key = (String) iterator.next();
-			stringBuilder.append(key + ":" + restParams.get(key));
-		}
-		return(stringBuilder.toString());
-	}
-
-	private Response doMethod(String method, HashMap<String, String> restParams, String unmappedParams) {
-		return(HttpUtils.okResponse(this.getClass().getName() + " [ " + method + " ] request: says OK, with params: " + getRestParams(restParams) + ", and un-mapped params of:" + unmappedParams));
-	}
-
 	/**
 	 * do a get request for a specific file
 	 */
 	public Response doGet(File rootDir, IHTTPSession httpSession, HashMap<String, String> restParams, String unmappedParams) {
-		System.out.println(unmappedParams);
-		return(doMethod("GET", restParams, unmappedParams));
-	}
-
-	public Response doPost(File rootDir, IHTTPSession httpSession, HashMap<String, String> restParams, String unmappedParams) {
-		return(doMethod("POST", restParams, unmappedParams));
+		String replaceAll = unmappedParams.replaceAll("\\.\\./", "").replaceAll("//", "/");
+		System.out.println("GETTING " + replaceAll);
+		File file = new File("./artifacts/" + replaceAll);
+		try {
+			InputStream inputStream = new FileInputStream(file);
+			return(new Response(Response.Status.OK, "application/octet-stream", inputStream));
+		} catch (FileNotFoundException fnfex) {
+			return(HttpUtils.notFoundResponse());
+		}
 	}
 
 	public Response doPut(File rootDir, IHTTPSession httpSession, HashMap<String, String> restParams, String unmappedParams) {
 		String replaceAll = unmappedParams.replaceAll("\\.\\./", "").replaceAll("//", "/");
+		System.out.println("PUTTING " + replaceAll);
+
 		File file = new File("./artifacts/" + replaceAll);
 		file.getParentFile().mkdirs();
 		OutputStream outputStream = null;
@@ -70,8 +63,8 @@ public class HederaRestServant extends RestRoutable {
 				} catch (IOException ioex) { }
 			}
 		}
-		System.out.println("PUTTING " + replaceAll);
-		return(doMethod("PUT", restParams, unmappedParams));
+		System.out.println("DONE " + replaceAll);
+		return(HttpUtils.okResponse());
 	}
 
 	public Response doHead(File rootDir, IHTTPSession httpSession, HashMap<String, String> restParams, String unmappedParams) {

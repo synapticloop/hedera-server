@@ -16,4 +16,6 @@ dist/static/css/style.css
 
 dist/static/images/routemaster.png
 
+dist/artifacts/
+
 .classpath
