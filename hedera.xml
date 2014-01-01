@@ -1,0 +1,11 @@
+<hedera>
+	<repository url="http://localhost:5474/" />
+
+	<location name="compile" dir="lib/compile" />
+	<location name="runtime" dir="lib/runtime" />
+	<location name="test" dir="lib/test" />
+	<location name="utils" dir="lib/utils" />
+
+	<artifact url="https://github.com/synapticloop/routemaster/raw/master/dist/routemaster.jar" locations="runtime" />
+	<artifact url="https://github.com/synapticloop/hedera-client/raw/master/dist/hedera-client-latest.jar" locations="utils" />
+</hedera>
